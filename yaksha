@@ -154,3 +154,10 @@ test.describe('Yaksha Functional Test Suite', () => {
   });
  
 });
+
+
+login.json
+{
+  "username": "Admin",
+  "password": "admin123"
+}
