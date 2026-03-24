@@ -1,4 +1,4 @@
-**AdminPage.ts**
+*new*AdminPage.ts**
 import { Page, Locator, expect } from '@playwright/test';
 export default class AdminPage {
  readonly page: Page;
