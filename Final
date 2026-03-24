@@ -1,0 +1,231 @@
+login
+
+import { Page } from '@playwright/test';
+
+export default class LoginPage {
+  readonly page: Page;
+  readonly usernameInput;
+  readonly passwordInput;
+  readonly loginButton;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.usernameInput = page.locator('input[name="username"]');
+    this.passwordInput = page.locator('input[name="password"]');
+    this.loginButton = page.locator('button[type="submit"]');
+  }
+
+  async performLogin() {
+    await this.page.goto('https://opensource-demo.orangehrmlive.com/');
+
+    await this.usernameInput.fill('Admin');
+    await this.passwordInput.fill('admin123');
+
+    await this.loginButton.click();
+
+    await this.page.waitForURL('**/dashboard**');
+  }
+}
+
+myinfo
+
+import { Page } from '@playwright/test';
+import path from 'path';
+
+const filePath = path.resolve(__dirname, '../TestImage.jpg');
+
+export default class MyInfoPage {
+  readonly page: Page;
+  readonly myInfo;
+  readonly image;
+  readonly fileInput;
+  readonly saveBtn;
+
+  constructor(page: Page) {
+    this.page = page;
+
+    this.myInfo = page.locator('a[href*="pim/viewMyDetails"]');
+    this.image = page.locator('.employee-image-wrapper img');
+    this.fileInput = page.locator('input[type="file"]');
+    this.saveBtn = page.locator('button:has-text("Save")');
+  }
+
+  async myInfoPage() {
+    await this.myInfo.click();
+
+    await this.page.waitForSelector('.employee-image-wrapper img');
+
+    await this.image.click();
+
+    await this.fileInput.setInputFiles(filePath);
+
+    await this.page.waitForTimeout(2000);
+
+    await this.saveBtn.click();
+
+    await this.page.waitForSelector("//p[contains(@class,'toast-message')]");
+  }
+}
+
+admin
+
+import { Page } from '@playwright/test';
+
+export default class AdminPage {
+  readonly page: Page;
+  readonly adminLink;
+  readonly addBtn;
+  readonly input;
+  readonly saveBtn;
+  readonly editBtn;
+  readonly upgradeBtn;
+
+  constructor(page: Page) {
+    this.page = page;
+
+    this.adminLink = page.locator('//span[text()="Admin"]');
+    this.addBtn = page.locator('button:has-text("Add")');
+    this.input = page.locator('input.oxd-input').nth(1);
+    this.saveBtn = page.locator('button:has-text("Save")');
+    this.editBtn = page.locator('.oxd-icon-button').first();
+    this.upgradeBtn = page.locator('//button[text()="Upgrade"]');
+  }
+
+  async EditEmpStatus(name: string) {
+    await this.adminLink.click();
+
+    await this.page.locator('//span[text()="Job"]').click();
+    await this.page.locator('//a[text()="Employment Status"]').click();
+
+    await this.page.waitForSelector('.oxd-table');
+
+    await this.editBtn.click();
+    await this.input.fill(name);
+    await this.saveBtn.click();
+  }
+
+  async AddEmpStatus(name: string) {
+    await this.adminLink.click();
+
+    await this.page.locator('//span[text()="Job"]').click();
+    await this.page.locator('//a[text()="Employment Status"]').click();
+
+    await this.addBtn.click();
+    await this.input.fill(name);
+    await this.saveBtn.click();
+  }
+
+  async adminModules() {
+    await this.adminLink.click();
+
+    await this.page.locator('//span[text()="Configuration"]').click();
+    await this.page.locator('//a[text()="Modules"]').click();
+
+    await this.page.waitForSelector('//h6[text()="Module Configuration"]');
+  }
+
+  async upgrade() {
+    await this.adminLink.click();
+
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent('page'),
+      this.upgradeBtn.click()
+    ]);
+
+    await newPage.waitForLoadState();
+  }
+}
+
+buzz
+
+import { Page } from '@playwright/test';
+import path from 'path';
+
+const filePath = path.resolve(__dirname, '../TestImage.jpg');
+
+export default class BuzzPage {
+  readonly page: Page;
+  readonly buzzLink;
+  readonly shareBtn;
+  readonly fileInput;
+  readonly commentBox;
+  readonly postBtn;
+  readonly commentInput;
+  readonly commentBtn;
+  readonly editToggle;
+  readonly editText;
+  readonly saveBtn;
+
+  constructor(page: Page) {
+    this.page = page;
+
+    this.buzzLink = page.locator('//span[text()="Buzz"]');
+    this.shareBtn = page.locator('button:has-text("Share Photos")');
+    this.fileInput = page.locator('input[type="file"]');
+    this.commentBox = page.locator('textarea').first();
+    this.postBtn = page.locator('button:has-text("Post")');
+
+    this.commentInput = page.locator('textarea');
+    this.commentBtn = page.locator('button:has-text("Comment")');
+
+    this.editToggle = page.locator('.oxd-icon.bi-three-dots');
+    this.editText = page.locator('textarea');
+    this.saveBtn = page.locator('button:has-text("Save")');
+  }
+
+  async sharePhotoPost(comment: string) {
+    await this.buzzLink.click();
+
+    await this.page.waitForSelector('textarea');
+
+    await this.shareBtn.click();
+
+    await this.fileInput.setInputFiles(filePath);
+
+    await this.commentBox.fill(comment);
+
+    await this.postBtn.click();
+
+    await this.page.waitForSelector('.oxd-toast-content');
+  }
+
+  async addCommentToPost(comment: string) {
+    await this.buzzLink.click();
+
+    await this.page.waitForSelector('textarea');
+
+    await this.commentInput.first().fill(comment);
+
+    await this.commentBtn.first().click();
+
+    await this.page.waitForTimeout(2000);
+  }
+
+  async editPost(comment: string, editPostText: string) {
+    await this.buzzLink.click();
+
+    await this.page.waitForSelector('textarea');
+
+    await this.shareBtn.click();
+    await this.fileInput.setInputFiles(filePath);
+    await this.commentBox.fill(comment);
+    await this.postBtn.click();
+
+    await this.page.waitForTimeout(3000);
+
+    await this.editToggle.first().click();
+
+    await this.editText.fill(editPostText);
+
+    await this.saveBtn.click();
+
+    await this.page.waitForSelector('.oxd-toast-content');
+  }
+
+  async mostcommentTab() {
+    await this.buzzLink.click();
+    await this.page.locator('//button[text()="Most Commented Posts"]').click();
+  }
+}
+
+
