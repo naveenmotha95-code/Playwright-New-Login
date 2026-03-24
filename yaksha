@@ -1,0 +1,156 @@
+Yaksha.specs.ts
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { test, expect } from '@playwright/test';
+import path from 'path';
+ 
+const filePath = path.resolve(__dirname, '../../TestImage.jpg');
+ 
+test.describe('Yaksha Functional Test Suite', () => {
+ 
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/');
+ 
+    await page.fill('input[name="username"]', 'Admin');
+    await page.fill('input[name="password"]', 'admin123');
+    await page.click('button[type="submit"]');
+ 
+    await page.waitForURL('**/dashboard**');
+  });
+ 
+  // TS-1
+  test('TS-1: Validate profile upload', async ({ page }) => {
+    await page.click('a[href*="pim/viewMyDetails"]');
+ 
+    await page.waitForSelector('.employee-image-wrapper img');
+    await page.click('.employee-image-wrapper img');
+ 
+    await page.setInputFiles('input[type="file"]', filePath);
+ 
+    await page.click('button:has-text("Save")');
+ 
+    await expect(page.locator("//p[contains(@class,'toast-message')]")).toBeVisible();
+  });
+ 
+  // TS-2
+  test('TS-2: Edit Employment Status', async ({ page }) => {
+    await page.click('//span[text()="Admin"]');
+    await page.click('//span[text()="Job"]');
+    await page.click('//a[text()="Employment Status"]');
+ 
+    await page.waitForSelector('.oxd-table');
+ 
+    await page.click('.oxd-icon-button');
+    await page.fill('input.oxd-input:nth-child(2)', 'TestEdit');
+ 
+    await page.click('button:has-text("Save")');
+  });
+ 
+  // TS-3
+  test('TS-3: Add Employment Status', async ({ page }) => {
+    await page.click('//span[text()="Admin"]');
+    await page.click('//span[text()="Job"]');
+    await page.click('//a[text()="Employment Status"]');
+ 
+    await page.click('button:has-text("Add")');
+ 
+    await page.fill('input.oxd-input:nth-child(2)', 'TestAdd');
+ 
+    await page.click('button:has-text("Save")');
+  });
+ 
+  // TS-4
+  test('TS-4: Upgrade opens new tab', async ({ context, page }) => {
+    await page.click('//span[text()="Admin"]');
+ 
+    const [newPage] = await Promise.all([
+      context.waitForEvent('page'),
+      page.click('//button[text()="Upgrade"]')
+    ]);
+ 
+    await newPage.waitForLoadState();
+    expect(newPage.url()).toContain('orangehrm');
+  });
+ 
+  // TS-5
+  test('TS-5: Help tooltip', async ({ page }) => {
+    await page.click('a[href*="pim/viewMyDetails"]');
+ 
+    const helpIcon = page.locator('.oxd-icon.bi-question-lg');
+    await helpIcon.hover();
+ 
+    await expect(helpIcon).toBeVisible();
+  });
+ 
+  // TS-6
+  test('TS-6: Module Configuration', async ({ page }) => {
+    await page.click('//span[text()="Admin"]');
+    await page.click('//span[text()="Configuration"]');
+    await page.click('//a[text()="Modules"]');
+ 
+    await expect(page.locator('//h6[text()="Module Configuration"]')).toBeVisible();
+  });
+ 
+  // TS-7
+  test('TS-7: Share Photo', async ({ page }) => {
+    await page.click('//span[text()="Buzz"]');
+ 
+    await page.click('button:has-text("Share Photos")');
+ 
+    await page.setInputFiles('input[type="file"]', filePath);
+ 
+    await page.fill('textarea', 'Test Photo');
+ 
+    await page.click('button:has-text("Post")');
+ 
+    await expect(page.locator('.oxd-toast-content')).toBeVisible();
+  });
+ 
+  // TS-8
+  test('TS-8: Most Commented Posts', async ({ page }) => {
+    await page.click('//span[text()="Buzz"]');
+ 
+    await page.click('//button[text()="Most Commented Posts"]');
+ 
+    await expect(page.locator('//button[text()="Most Commented Posts"]')).toBeVisible();
+  });
+ 
+  // TS-9
+  test('TS-9: Add Comment', async ({ page }) => {
+    await page.click('//span[text()="Buzz"]');
+ 
+    await page.fill('textarea', 'Test Comment');
+ 
+    await page.click('button:has-text("Comment")');
+ 
+    await page.waitForTimeout(2000);
+  });
+ 
+  // TS-10
+  test('TS-10: Edit Post', async ({ page }) => {
+    await page.click('//span[text()="Buzz"]');
+ 
+    await page.click('button:has-text("Share Photos")');
+ 
+    await page.setInputFiles('input[type="file"]', filePath);
+ 
+    await page.fill('textarea', 'Original Post');
+ 
+    await page.click('button:has-text("Post")');
+ 
+    await page.waitForTimeout(3000);
+ 
+    await page.click('.oxd-icon.bi-three-dots');
+    await page.fill('textarea', 'Edited Post');
+ 
+    await page.click('button:has-text("Save")');
+ 
+    await expect(page.locator('.oxd-toast-content')).toBeVisible();
+  });
+ 
+});
